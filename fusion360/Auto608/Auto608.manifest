@@ -1,0 +1,10 @@
+{
+	"autodeskProduct": "Fusion360",
+	"type": "script",
+	"author": "",
+	"description": {
+		"": "Autko-spinner z gniazdem na lozysko 608 na masce (model wg zdjec rzutow)"
+	},
+	"supportedOS": "windows|mac",
+	"editEnabled": true
+}
