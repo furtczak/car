@@ -5,6 +5,8 @@ Model autka odtworzony ze zdjęć rzutów (przód, tył, boki, 3/4) z gniazdem n
 
 ![podgląd](docs/podglad_rzuty.png)
 
+> W tym repozytorium jest też **panda wanka-wstanka** na Bambu P1S: [`panda_rolypoly/`](panda_rolypoly/README.md).
+
 ## Zawartość
 
 | Ścieżka | Co to jest |
