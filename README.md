@@ -1,5 +1,9 @@
 # Auto 608: autko-spinner z łożyskiem 608 na masce
 
+> Osobno w repo są też modele samego łożyska 608:
+> [do druku 3D w jednym kawałku](#łożysko-608-do-druku-3d-print-in-place) i
+> [szczegółowy model stalowego 608ZZ](#łożysko-608zz-model-szczegółowy).
+
 Model autka odtworzony ze zdjęć rzutów (przód, tył, boki, 3/4) z gniazdem na
 łożysko **608** (8 × 22 × 7 mm) na masce oraz nakrętką spinnera w kształcie felgi.
 
@@ -98,3 +102,75 @@ Test wykonuje prawdziwy kod `Auto608.py` na atrapie API Fusion zbudowanej na Cad
 Płaszczyzna XZ ma w atrapie celowo odwróconą orientację. Wynik musi być identyczny z
 modelem referencyjnym (różnica objętości 0 mm³). Test sprawdza logikę skryptu (kierunki,
 profile, kolejność operacji), ale nie zastępuje uruchomienia w prawdziwym Fusion.
+
+## Łożysko 608ZZ (model szczegółowy)
+
+![łożysko 608ZZ](docs/lozysko_608zz_render.png)
+
+Pełne złożenie łożyska kulkowego 608ZZ zbudowane natywnymi operacjami Fusion 360
+(szkice, obroty, operacje Combine) jako osobne komponenty:
+
+| Komponent | Szt. | Szczegóły |
+|---|---|---|
+| Pierścień wewnętrzny | 1 | otwór Ø8, bieżnia o promieniu 0,52·Dw, odsadzenie Ø12,1, podcięcia labiryntu pod osłony, zaokrąglenia r 0,3 |
+| Pierścień zewnętrzny | 1 | Ø22, bieżnia 0,53·Dw, gniazda osłon Ø19,2 z podcięciem (zawalcowanie), zaokrąglenia r 0,3 |
+| Kulka 3,969 (5/32") | 7 | jeden komponent, 7 wystąpień na średnicy podziałowej Ø15 |
+| Koszyk | 1 | koszyk wstążkowy: dwie blachy 0,3 mm, kuliste kieszenie (luz 0,08), 7 nitów |
+| Osłona ZZ | 2 | blacha 0,3 mm, jeden komponent, dwa wystąpienia |
+
+Wymiary według ISO 15 i katalogu SKF (608-2Z): d = 8, D = 22, B = 7, r_s = 0,3.
+Luz promieniowy wynosi 10 µm (klasa CN). Części nie kolidują ze sobą. Masa w stali
+wychodzi 12,5 g (katalog: 12 g). Oś łożyska to Z, a środek leży w (0, 0, 0).
+
+![przekrój](docs/lozysko_608zz_przekroj.png)
+
+| Ścieżka | Co to jest |
+|---|---|
+| `fusion360/Lozysko608ZZ/` | **Skrypt Fusion 360**, uruchamiany tak samo jak Auto608 (folder `Lozysko608ZZ`) |
+| `export/lozysko_608zz.step` | Gotowe złożenie (11 brył, nazwy i kolory) do `File → Open` w Fusion |
+| `export/lozysko_608zz.stl` | Całe łożysko jako siatka |
+| `cadquery_ref/lozysko_608zz_cq.py` | Ta sama geometria w CadQuery. Z niej generuje się STEP/STL |
+| `tools/test_lozysko_608zz.py` | Uruchamia skrypt Fusion na atrapie API i sprawdza zgodność z CadQuery, kolizje, wymiary, luzy i masę |
+
+Po uruchomieniu skryptu wnętrze obejrzysz przez `Inspect → Section Analysis`
+na płaszczyźnie XZ albo po ukryciu komponentu *Oslona ZZ*. Wszystkie wymiary
+(średnica kulek, luz, promienie bieżni, przekrój osłony, koszyk) to stałe na
+początku `Lozysko608ZZ.py`. Wersja CadQuery czyta je z tego samego pliku.
+
+```bash
+python3 cadquery_ref/lozysko_608zz_cq.py   # STEP/STL do export/
+python3 tools/test_lozysko_608zz.py        # test skryptu Fusion
+```
+
+## Łożysko 608 do druku 3D (print-in-place)
+
+![łożysko 608 do druku](docs/lozysko_608_druk_render.png)
+
+Łożysko 608 (8 × 22 × 7) drukowane w całości, bez składania. Zasada działania
+jest wzięta z łożyska „一体打印608zz轴承” (Siegfried_Kircheis, MakerWorld). Geometrię
+odczytałem z jego pliku 3MF i odbudowałem parametrycznie. Dla luzu 0,15 mm
+przekroje zgadzają się z oryginałem z dokładnością do 0,0001 mm.
+
+* **10 wałków w kształcie szpulki** (Ø4,5 na końcach, talia Ø2,7) zamiast kulek i koszyka.
+* Na obu pierścieniach są **grzbiety w kształcie litery V** o zboczach 45°, które wchodzą
+  w talię wałków. Dzięki temu wałki nie wypadają osiowo. Wszystkie zbocza mają 45°,
+  więc łożysko drukuje się bez podpór.
+* **Luz jest mierzony prostopadle do każdej powierzchni.** Skrypt pyta o niego przy
+  uruchomieniu (0,15 mm dla dobrze skalibrowanej drukarki, 0,20–0,25 mm dla luźniejszej).
+* **Otwór i średnica zewnętrzna są rozchylone o 0,2 mm przy czołach**, żeby „stopa słonia”
+  nie zmniejszała otworu Ø8 ani nie powiększała średnicy Ø22.
+
+![przekrój](docs/lozysko_608_druk_przekroj.png)
+
+| Ścieżka | Co to jest |
+|---|---|
+| `fusion360/Lozysko608Druk/` | **Skrypt Fusion 360**. Przy uruchomieniu pyta o luz |
+| `export/lozysko_608_druk_luz015.stl` (`020`, `025`) | Gotowe do druku, trzy luzy |
+| `export/lozysko_608_druk_luz015.step` | Złożenie STEP (luz 0,15) |
+| `cadquery_ref/lozysko_608_druk_cq.py` | Ta sama geometria w CadQuery, eksport STL/STEP |
+| `tools/test_lozysko_608_druk.py` | Test skryptu Fusion: zgodność z CadQuery, luzy, kolizje, wymiary |
+
+**Druk** (ustawienia autora oryginału): PLA, warstwa 0,12 mm, 2 obrysy, 15% wypełnienia,
+bez podpór, oś pionowo, kompensacja stopy słonia 0,15. Po wydruku przekręć palcem
+każdy wałek, żeby go uwolnić. Kropla oleju poprawia obroty. Łożysko pasuje do gniazda
+Ø22,15 w masce auta.

@@ -1,0 +1,10 @@
+{
+	"autodeskProduct": "Fusion360",
+	"type": "script",
+	"author": "",
+	"description": {
+		"": "Lozysko 608 do druku 3D w jednym kawalku: 10 walkow-szpulek, grzbiety V 45 st., luz podawany przy uruchomieniu"
+	},
+	"supportedOS": "windows|mac",
+	"editEnabled": true
+}
