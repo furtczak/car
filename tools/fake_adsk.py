@@ -95,7 +95,28 @@ class _Enum(object):
         self.__dict__.update(kw)
 
 
+class Matrix3D(object):
+    """tylko obrot wokol osi przez poczatek ukladu (tyle uzywaja skrypty)"""
+    def __init__(self):
+        self.angle, self.axis = 0.0, (0.0, 0.0, 1.0)
+
+    @staticmethod
+    def create():
+        return Matrix3D()
+
+    def setToRotation(self, angle, axis, origin):
+        assert max(abs(origin.x), abs(origin.y), abs(origin.z)) < 1e-12
+        self.angle, self.axis = angle, (axis.x, axis.y, axis.z)
+        return True
+
+    def apply(self, shape):
+        if not self.angle:
+            return shape
+        return shape.rotate(CV(0, 0, 0), CV(*self.axis), math.degrees(self.angle))
+
+
 core.Vector3D, core.Point3D, core.ValueInput, core.ObjectCollection = Vector3D, Point3D, ValueInput, ObjectCollection
+core.Matrix3D = Matrix3D
 core.Curve3DTypes = _Enum(Circle3DCurveType='circle', Line3DCurveType='line')
 core.SurfaceTypes = _Enum(PlaneSurfaceType='plane')
 core.DocumentTypes = _Enum(FusionDesignDocumentType=1)
@@ -171,7 +192,8 @@ class SketchLine(_Curve):
 class SketchArc(_Curve):
     def __init__(self, sk, a, mid, b):
         self.sk, self.mid = sk, mid
-        self.startSketchPoint, self.endSketchPoint = SketchPoint(a), SketchPoint(b)
+        self.startSketchPoint = a if isinstance(a, SketchPoint) else SketchPoint(a)
+        self.endSketchPoint = b if isinstance(b, SketchPoint) else SketchPoint(b)
 
     def edge(self):
         return cq.Edge.makeThreePointArc(self.sk.m(self.startSketchPoint.geometry), self.sk.m(self.mid),
@@ -314,6 +336,16 @@ class BRepBody(object):
 class BRepBodies(object):
     def __init__(self, comp):
         self.comp, self._list = comp, []
+
+    def __iter__(self):
+        return iter(list(self._list))
+
+    @property
+    def count(self):
+        return len(self._list)
+
+    def item(self, i):
+        return self._list[i]
 
     def itemByName(self, n):
         for b in self._list:
@@ -492,9 +524,42 @@ class RemoveFeatures(object):
         self.comp.bRepBodies._list.remove(body)
 
 
+class Occurrence(object):
+    def __init__(self, component, transform):
+        self.component, self.transform = component, transform
+
+    def bodies(self):
+        """(nazwa, bryla w ukladzie zlozenia)"""
+        return [(b.name, self.transform.apply(b.solid)) for b in self.component.bRepBodies._list]
+
+
+class Occurrences(object):
+    def __init__(self, design):
+        self.design, self._list = design, []
+
+    def __iter__(self):
+        return iter(self._list)
+
+    @property
+    def count(self):
+        return len(self._list)
+
+    def addNewComponent(self, transform):
+        o = Occurrence(Component(self.design), transform)
+        self._list.append(o)
+        return o
+
+    def addExistingComponent(self, comp, transform):
+        o = Occurrence(comp, transform)
+        self._list.append(o)
+        return o
+
+
 class Component(object):
     def __init__(self, design):
         self.design = design
+        self.name = ''
+        self.occurrences = Occurrences(design)
         X, Y, Z = CV(1, 0, 0), CV(0, 1, 0), CV(0, 0, 1)
         O = CV(0, 0, 0)
         self.xYConstructionPlane = ConstructionPlane(O, Z, X, self)

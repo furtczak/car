@@ -1,0 +1,10 @@
+{
+	"autodeskProduct": "Fusion360",
+	"type": "script",
+	"author": "",
+	"description": {
+		"": "Lozysko kulkowe 608ZZ (8 x 22 x 7 mm) - zlozenie: pierscienie, 7 kulek, koszyk wstazkowy, oslony ZZ"
+	},
+	"supportedOS": "windows|mac",
+	"editEnabled": true
+}
